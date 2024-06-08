@@ -5,19 +5,23 @@ import (
 	"net/http"
 )
 
-func healthCheckHandler(w http.ResponseWriter, r *http.Request) {
-	w.Header().Add("Content-Type", "text/plain; charset=utf-8")
-	w.WriteHeader(200)
-	w.Write([]byte("OK"))
+type apiConfig struct {
+	fileserverHits int
 }
 
 func main() {
+	cfg := &apiConfig{
+		fileserverHits: 0,
+	}
 	port := "8080"
 	filepathRoot := "."
 	sm := http.NewServeMux()
 
-	sm.HandleFunc("/healthz", healthCheckHandler)
-	sm.Handle("/app/*", http.FileServer(http.Dir(filepathRoot)))
+	handler := http.StripPrefix("/app/", http.FileServer(http.Dir(filepathRoot)))
+	sm.HandleFunc("GET /api/healthz", healthCheckHandler)
+	sm.HandleFunc("GET /api/metrics", cfg.getMetricsHandler)
+	sm.HandleFunc("/api/reset", cfg.resetMetricsHandler)
+	sm.Handle("/app/*", cfg.middlewareMetricsInc(handler))
 
 	server := &http.Server{
 		Addr:    ":" + port,
