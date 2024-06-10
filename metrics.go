@@ -13,8 +13,15 @@ func (cfg *apiConfig) middlewareMetricsInc(next http.Handler) http.Handler {
 }
 
 func (cfg *apiConfig) getMetricsHandler(w http.ResponseWriter, r *http.Request) {
-	hits := fmt.Sprintf("Hits: %d", cfg.fileserverHits)
-	w.Header().Add("Content-Type", "text/plain; charset=utf-8")
+	hits := fmt.Sprintf(`
+	<html>
+	<body>
+    	<h1>Welcome, Chirpy Admin</h1>
+    	<p>Chirpy has been visited %d times!</p>
+	</body>
+	</html>
+	`, cfg.fileserverHits)
+	w.Header().Add("Content-Type", "text/html; charset=utf-8")
 	w.WriteHeader(200)
 	w.Write([]byte(hits))
 }

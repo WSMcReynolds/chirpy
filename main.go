@@ -19,8 +19,9 @@ func main() {
 
 	handler := http.StripPrefix("/app/", http.FileServer(http.Dir(filepathRoot)))
 	sm.HandleFunc("GET /api/healthz", healthCheckHandler)
-	sm.HandleFunc("GET /api/metrics", cfg.getMetricsHandler)
+	sm.HandleFunc("GET /admin/metrics", cfg.getMetricsHandler)
 	sm.HandleFunc("/api/reset", cfg.resetMetricsHandler)
+	sm.HandleFunc("/api/validate_chirp", validateChirpHandler)
 	sm.Handle("/app/*", cfg.middlewareMetricsInc(handler))
 
 	server := &http.Server{
