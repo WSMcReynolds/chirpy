@@ -12,7 +12,7 @@ func (cfg *apiConfig) middlewareMetricsInc(next http.Handler) http.Handler {
 	})
 }
 
-func (cfg *apiConfig) getMetricsHandler(w http.ResponseWriter, r *http.Request) {
+func (cfg *apiConfig) metricsGetHandler(w http.ResponseWriter, r *http.Request) {
 	hits := fmt.Sprintf(`
 	<html>
 	<body>
