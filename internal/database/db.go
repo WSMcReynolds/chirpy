@@ -141,7 +141,7 @@ func (db *DB) GetUsers() ([]User, error) {
 	return users, nil
 }
 
-func (db *DB) GetUser(email string) (User, error) {
+func (db *DB) GetUserByEmail(email string) (User, error) {
 	dbStructure, err := db.loadDB()
 	if err != nil {
 		return User{}, err
@@ -154,6 +154,49 @@ func (db *DB) GetUser(email string) (User, error) {
 	}
 
 	return User{}, errors.New("no user found")
+}
+
+func (db *DB) GetUserById(id int) (User, error) {
+	dbStructure, err := db.loadDB()
+	if err != nil {
+		return User{}, err
+	}
+
+	user, ok := dbStructure.Users[id]
+	if !ok {
+		return User{}, ErrNotExist
+	}
+
+	return user, nil
+}
+
+func (db *DB) UpdateUser(id int, email, password string) (User, error) {
+	dbStructure, err := db.loadDB()
+	if err != nil {
+		return User{}, err
+	}
+
+	hashedPasswordbytes, err := bcrypt.GenerateFromPassword([]byte(password), 2)
+	if err != nil {
+		return User{}, err
+	}
+
+	hashedPassword := string(hashedPasswordbytes)
+
+	user := User{
+		Id:       id,
+		Email:    email,
+		Password: hashedPassword,
+	}
+
+	dbStructure.Users[id] = user
+
+	err = db.writeDB(dbStructure)
+	if err != nil {
+		return User{}, err
+	}
+
+	return user, nil
 }
 
 func (db *DB) createDB() error {

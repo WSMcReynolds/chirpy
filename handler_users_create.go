@@ -8,6 +8,7 @@ import (
 type User struct {
 	Id    int    `json:"id"`
 	Email string `json:"email"`
+	Token string `json:"token,omitempty"`
 }
 
 func (cfg *apiConfig) usersCreateHandler(w http.ResponseWriter, r *http.Request) {
@@ -24,7 +25,7 @@ func (cfg *apiConfig) usersCreateHandler(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
-	existingUser, _ := cfg.DB.GetUser(params.Email)
+	existingUser, _ := cfg.DB.GetUserByEmail(params.Email)
 
 	if existingUser.Email == params.Email {
 		respondWithError(w, http.StatusBadRequest, "User with email already exists")
