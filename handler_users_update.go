@@ -38,7 +38,7 @@ func (cfg *apiConfig) usersUpdateHandler(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
-	_, err = cfg.DB.GetUserById(userId)
+	user, err := cfg.DB.GetUserById(userId)
 
 	if err != nil {
 		respondWithError(w, http.StatusNotFound, "No user found")
@@ -58,7 +58,7 @@ func (cfg *apiConfig) usersUpdateHandler(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
-	user, err := cfg.DB.UpdateUser(userId, params.Email, params.Password)
+	user, err = cfg.DB.UpdateUser(userId, params.Email, params.Password, user.RefreshToken)
 
 	if err != nil {
 		respondWithError(w, http.StatusInternalServerError, "Couldn't update user")

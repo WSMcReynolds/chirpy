@@ -60,8 +60,10 @@ func main() {
 	sm.HandleFunc("POST /api/users", cfg.usersCreateHandler)
 	sm.HandleFunc("PUT /api/users", cfg.usersUpdateHandler)
 
-	// Login endpoints
+	// Auth endpoints
 	sm.HandleFunc("POST /api/login", cfg.loginRequestHandler)
+	sm.HandleFunc("POST /api/refresh", cfg.refreshCreateHandler)
+	sm.HandleFunc("POST /api/revoke", cfg.refreshRevokeHandler)
 
 	server := &http.Server{
 		Addr:    ":" + port,

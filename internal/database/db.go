@@ -27,9 +27,15 @@ type Chirp struct {
 }
 
 type User struct {
-	Id       int    `json:"id"`
-	Email    string `json:"email"`
-	Password string `json:"password"`
+	Id           int    `json:"id"`
+	Email        string `json:"email"`
+	Password     string `json:"password"`
+	RefreshToken string `json:"refresh_token"`
+}
+
+type RefreshToken struct {
+	Id    int    `json:"id"`
+	Token string `json:"refresh_token"`
 }
 
 func NewDB(path string) (*DB, error) {
@@ -82,9 +88,10 @@ func (db *DB) CreateUser(email, password string) (User, error) {
 	hashedPassword := string(hashedPasswordbytes)
 
 	user := User{
-		Id:       id,
-		Email:    email,
-		Password: hashedPassword,
+		Id:           id,
+		Email:        email,
+		Password:     hashedPassword,
+		RefreshToken: "",
 	}
 
 	dbStructure.Users[id] = user
@@ -153,7 +160,22 @@ func (db *DB) GetUserByEmail(email string) (User, error) {
 		}
 	}
 
-	return User{}, errors.New("no user found")
+	return User{}, ErrNotExist
+}
+
+func (db *DB) GetUserByToken(token string) (User, error) {
+	dbStructure, err := db.loadDB()
+	if err != nil {
+		return User{}, err
+	}
+
+	for _, user := range dbStructure.Users {
+		if user.RefreshToken == token {
+			return user, nil
+		}
+	}
+
+	return User{}, ErrNotExist
 }
 
 func (db *DB) GetUserById(id int) (User, error) {
@@ -170,7 +192,7 @@ func (db *DB) GetUserById(id int) (User, error) {
 	return user, nil
 }
 
-func (db *DB) UpdateUser(id int, email, password string) (User, error) {
+func (db *DB) UpdateUser(id int, email, password string, refreshToken string) (User, error) {
 	dbStructure, err := db.loadDB()
 	if err != nil {
 		return User{}, err
@@ -184,9 +206,10 @@ func (db *DB) UpdateUser(id int, email, password string) (User, error) {
 	hashedPassword := string(hashedPasswordbytes)
 
 	user := User{
-		Id:       id,
-		Email:    email,
-		Password: hashedPassword,
+		Id:           id,
+		Email:        email,
+		Password:     hashedPassword,
+		RefreshToken: refreshToken,
 	}
 
 	dbStructure.Users[id] = user

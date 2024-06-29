@@ -1,6 +1,8 @@
 package main
 
 import (
+	"crypto/rand"
+	"encoding/hex"
 	"encoding/json"
 	"net/http"
 	"strconv"
@@ -58,14 +60,33 @@ func (cfg *apiConfig) loginRequestHandler(w http.ResponseWriter, r *http.Request
 	signedToken, err := jwtToken.SignedString([]byte(cfg.JWTSecret))
 
 	if err != nil {
-		respondWithError(w, http.StatusInternalServerError, "Unable to create token")
+		respondWithError(w, http.StatusInternalServerError, "Unable to create access token")
+		return
+	}
+
+	randHex := make([]byte, 32)
+
+	_, err = rand.Read(randHex)
+
+	if err != nil {
+		respondWithError(w, http.StatusInternalServerError, "Issue creating refresh token")
+		return
+	}
+
+	refreshToken := hex.EncodeToString(randHex)
+
+	user, err = cfg.DB.UpdateUser(user.Id, user.Email, user.Password, refreshToken)
+
+	if err != nil {
+		respondWithError(w, http.StatusInternalServerError, "Issue updating user")
 		return
 	}
 
 	responseWithJSON(w, http.StatusOK, User{
-		Id:    user.Id,
-		Email: user.Email,
-		Token: signedToken,
+		Id:           user.Id,
+		Email:        user.Email,
+		Token:        signedToken,
+		RefreshToken: user.RefreshToken,
 	})
 
 }

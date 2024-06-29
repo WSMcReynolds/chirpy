@@ -6,9 +6,10 @@ import (
 )
 
 type User struct {
-	Id    int    `json:"id"`
-	Email string `json:"email"`
-	Token string `json:"token,omitempty"`
+	Id           int    `json:"id"`
+	Email        string `json:"email"`
+	Token        string `json:"token,omitempty"`
+	RefreshToken string `json:"refresh_token,omitempty"`
 }
 
 func (cfg *apiConfig) usersCreateHandler(w http.ResponseWriter, r *http.Request) {
