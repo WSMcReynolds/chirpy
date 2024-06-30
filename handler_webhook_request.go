@@ -3,9 +3,25 @@ package main
 import (
 	"encoding/json"
 	"net/http"
+	"strings"
 )
 
 func (cfg *apiConfig) webhookRequestHandler(w http.ResponseWriter, r *http.Request) {
+
+	if len(r.Header.Values("Authorization")) == 0 {
+		w.WriteHeader(http.StatusUnauthorized)
+		return
+	}
+
+	authHeader := r.Header.Get("Authorization")
+	splitHeader := strings.Split(authHeader, " ")
+	apiToken := splitHeader[1]
+
+	if cfg.PolkaKey != apiToken {
+		w.WriteHeader(http.StatusUnauthorized)
+		return
+	}
+
 	type parameters struct {
 		Event string `json:"event"`
 		Data  struct {
