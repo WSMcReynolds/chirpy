@@ -3,46 +3,13 @@ package main
 import (
 	"encoding/json"
 	"net/http"
-	"strconv"
-	"strings"
-
-	"github.com/golang-jwt/jwt/v5"
 )
 
 func (cfg *apiConfig) usersUpdateHandler(w http.ResponseWriter, r *http.Request) {
-	authHeader := r.Header.Get("Authorization")
-	splitHeader := strings.Split(authHeader, " ")
-	authToken := splitHeader[1]
-	claims := jwt.MapClaims{}
-
-	jwtToken, err := jwt.ParseWithClaims(authToken, claims, func(token *jwt.Token) (interface{}, error) {
-		return []byte(cfg.JWTSecret), nil
-	})
+	user, err := cfg.confirmUserAuthenticaiton(r)
 
 	if err != nil {
-		respondWithError(w, http.StatusUnauthorized, "Bad token")
-		return
-	}
-
-	userIdString, err := jwtToken.Claims.GetSubject()
-
-	if err != nil {
-		respondWithError(w, http.StatusInternalServerError, "Issue parsing auth token")
-		return
-	}
-
-	userId, err := strconv.Atoi(userIdString)
-
-	if err != nil {
-		respondWithError(w, http.StatusInternalServerError, "Invalid User Id")
-		return
-	}
-
-	user, err := cfg.DB.GetUserById(userId)
-
-	if err != nil {
-		respondWithError(w, http.StatusNotFound, "No user found")
-		return
+		respondWithError(w, http.StatusUnauthorized, "Unauthorized")
 	}
 
 	type parameters struct {
@@ -58,7 +25,7 @@ func (cfg *apiConfig) usersUpdateHandler(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
-	user, err = cfg.DB.UpdateUser(userId, params.Email, params.Password, user.RefreshToken)
+	_, err = cfg.DB.UpdateUser(user.Id, params.Email, params.Password, user.RefreshToken)
 
 	if err != nil {
 		respondWithError(w, http.StatusInternalServerError, "Couldn't update user")

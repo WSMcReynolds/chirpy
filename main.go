@@ -54,6 +54,7 @@ func main() {
 	sm.HandleFunc("GET /api/chirps", cfg.chirpsRetrieveHandler)
 	sm.HandleFunc("GET /api/chirps/{chirpID}", cfg.chirpsGetHandler)
 	sm.HandleFunc("POST /api/chirps", cfg.chirpsCreateHandler)
+	sm.HandleFunc("DELETE /api/chirps/{chirpID}", cfg.chirpsDeleteHandler)
 
 	// Users endpoints
 	sm.HandleFunc("GET /api/users", cfg.usersRetrieveHandler)

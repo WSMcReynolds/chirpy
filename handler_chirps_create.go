@@ -8,18 +8,26 @@ import (
 )
 
 type Chirp struct {
-	Id   int    `json:"id"`
-	Body string `json:"body"`
+	Id       int    `json:"id"`
+	AuthorId int    `json:"author_id"`
+	Body     string `json:"body"`
 }
 
 func (cfg *apiConfig) chirpsCreateHandler(w http.ResponseWriter, r *http.Request) {
+
+	user, err := cfg.confirmUserAuthenticaiton(r)
+
+	if err != nil {
+		respondWithError(w, http.StatusUnauthorized, "Unauthorized")
+	}
+
 	type parameters struct {
 		Body string `json:"body"`
 	}
 
 	decoder := json.NewDecoder(r.Body)
 	params := parameters{}
-	err := decoder.Decode(&params)
+	err = decoder.Decode(&params)
 	if err != nil {
 		respondWithError(w, http.StatusInternalServerError, "Couldn't decode parameters")
 		return
@@ -31,15 +39,16 @@ func (cfg *apiConfig) chirpsCreateHandler(w http.ResponseWriter, r *http.Request
 		return
 	}
 
-	chirp, err := cfg.DB.CreateChirp(cleanChirp)
+	chirp, err := cfg.DB.CreateChirp(cleanChirp, user.Id)
 	if err != nil {
 		respondWithError(w, http.StatusInternalServerError, "Couldn't create chirp")
 		return
 	}
 
 	responseWithJSON(w, http.StatusCreated, Chirp{
-		Id:   chirp.Id,
-		Body: chirp.Body,
+		Id:       chirp.Id,
+		AuthorId: user.Id,
+		Body:     chirp.Body,
 	})
 }
 
