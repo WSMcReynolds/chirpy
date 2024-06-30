@@ -32,6 +32,7 @@ type User struct {
 	Email        string `json:"email"`
 	Password     string `json:"password"`
 	RefreshToken string `json:"refresh_token"`
+	IsChirpyRed  bool   `json:"is_chirpy_red"`
 }
 
 type RefreshToken struct {
@@ -94,6 +95,7 @@ func (db *DB) CreateUser(email, password string) (User, error) {
 		Email:        email,
 		Password:     hashedPassword,
 		RefreshToken: "",
+		IsChirpyRed:  false,
 	}
 
 	dbStructure.Users[id] = user
@@ -194,24 +196,35 @@ func (db *DB) GetUserById(id int) (User, error) {
 	return user, nil
 }
 
-func (db *DB) UpdateUser(id int, email, password string, refreshToken string) (User, error) {
+func (db *DB) UpdateUser(id int, email, password string, refreshToken string, isChirpyRed bool, newPassword bool) (User, error) {
 	dbStructure, err := db.loadDB()
 	if err != nil {
 		return User{}, err
 	}
 
-	hashedPasswordbytes, err := bcrypt.GenerateFromPassword([]byte(password), 2)
+	user, err := db.GetUserById(id)
+
 	if err != nil {
 		return User{}, err
 	}
 
-	hashedPassword := string(hashedPasswordbytes)
+	hashedPassword := user.Password
 
-	user := User{
+	if newPassword {
+		hashedPasswordbytes, err := bcrypt.GenerateFromPassword([]byte(password), 2)
+		if err != nil {
+			return User{}, err
+		}
+
+		hashedPassword = string(hashedPasswordbytes)
+	}
+
+	user = User{
 		Id:           id,
 		Email:        email,
 		Password:     hashedPassword,
 		RefreshToken: refreshToken,
+		IsChirpyRed:  isChirpyRed,
 	}
 
 	dbStructure.Users[id] = user

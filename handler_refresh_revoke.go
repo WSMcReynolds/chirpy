@@ -17,7 +17,7 @@ func (cfg *apiConfig) refreshRevokeHandler(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
-	_, err = cfg.DB.UpdateUser(user.Id, user.Email, user.Password, "")
+	_, err = cfg.DB.UpdateUser(user.Id, user.Email, user.Password, "", user.IsChirpyRed, false)
 
 	if err != nil {
 		respondWithError(w, http.StatusInternalServerError, "issue revoking refresh token")

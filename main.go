@@ -66,6 +66,9 @@ func main() {
 	sm.HandleFunc("POST /api/refresh", cfg.refreshCreateHandler)
 	sm.HandleFunc("POST /api/revoke", cfg.refreshRevokeHandler)
 
+	// Webhook endpoints
+	sm.HandleFunc("POST /api/polka/webhooks", cfg.webhookRequestHandler)
+
 	server := &http.Server{
 		Addr:    ":" + port,
 		Handler: sm,

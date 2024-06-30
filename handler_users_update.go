@@ -25,7 +25,7 @@ func (cfg *apiConfig) usersUpdateHandler(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
-	_, err = cfg.DB.UpdateUser(user.Id, params.Email, params.Password, user.RefreshToken)
+	_, err = cfg.DB.UpdateUser(user.Id, params.Email, params.Password, user.RefreshToken, user.IsChirpyRed, true)
 
 	if err != nil {
 		respondWithError(w, http.StatusInternalServerError, "Couldn't update user")
@@ -33,8 +33,9 @@ func (cfg *apiConfig) usersUpdateHandler(w http.ResponseWriter, r *http.Request)
 	}
 
 	responseWithJSON(w, http.StatusOK, User{
-		Id:    user.Id,
-		Email: user.Email,
+		Id:          user.Id,
+		Email:       user.Email,
+		IsChirpyRed: user.IsChirpyRed,
 	})
 
 }

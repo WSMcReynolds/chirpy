@@ -17,8 +17,9 @@ func (cfg *apiConfig) usersRetrieveHandler(w http.ResponseWriter, r *http.Reques
 
 	for _, user := range dbUsers {
 		users = append(users, User{
-			Id:    user.Id,
-			Email: user.Email,
+			Id:          user.Id,
+			Email:       user.Email,
+			IsChirpyRed: user.IsChirpyRed,
 		})
 	}
 

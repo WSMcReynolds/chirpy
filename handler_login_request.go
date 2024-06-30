@@ -34,6 +34,7 @@ func (cfg *apiConfig) loginRequestHandler(w http.ResponseWriter, r *http.Request
 	}
 
 	err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(params.Password))
+
 	if err != nil {
 		respondWithError(w, http.StatusUnauthorized, "Unauthorized")
 		return
@@ -75,7 +76,7 @@ func (cfg *apiConfig) loginRequestHandler(w http.ResponseWriter, r *http.Request
 
 	refreshToken := hex.EncodeToString(randHex)
 
-	user, err = cfg.DB.UpdateUser(user.Id, user.Email, user.Password, refreshToken)
+	user, err = cfg.DB.UpdateUser(user.Id, user.Email, user.Password, refreshToken, user.IsChirpyRed, false)
 
 	if err != nil {
 		respondWithError(w, http.StatusInternalServerError, "Issue updating user")
@@ -87,6 +88,7 @@ func (cfg *apiConfig) loginRequestHandler(w http.ResponseWriter, r *http.Request
 		Email:        user.Email,
 		Token:        signedToken,
 		RefreshToken: user.RefreshToken,
+		IsChirpyRed:  user.IsChirpyRed,
 	})
 
 }
